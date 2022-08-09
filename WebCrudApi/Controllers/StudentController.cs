@@ -37,6 +37,30 @@ namespace WebCrudApi.Controllers
             return Ok(student);
         }
 
+        [HttpGet("students/{page}")]
+        public async Task<ActionResult<List<StudentResponse>>> GetStudents(int page)
+        {
+            if (dataContext.Students == null) return NotFound();
+
+            var pageRes = 3f;
+            var pageCount = Math.Ceiling(dataContext.Students.Count() / pageRes);
+
+            var students = await dataContext.Students
+                .Skip((page - 1) * (int)pageRes)
+                .Take((int)pageRes)
+                .ToListAsync();
+
+            var res = new StudentResponse
+            {
+                Students = students,
+                Pages = (int)pageCount,
+                CurrentPage = page
+            };
+
+            return Ok(res);
+
+        }
+
         [HttpPost]
         public async Task<ActionResult<List<Student>>> AddStudent(Student student)
         {
